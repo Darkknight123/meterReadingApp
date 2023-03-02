@@ -1,16 +1,14 @@
 package com.example.userdisplay.room
 
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 
 class MeterReadingRepository(private val meterReadingDao: CustomerMeterReadingDao) {
+    val response : kotlinx.coroutines.flow.Flow<CustomerMeterReading> = meterReadingDao.getAll()
 
-    val allReadings: LiveData<CustomerMeterReading> = meterReadingDao.getAll()
-
-    fun insert(meterReading: CustomerMeterReading) {
-        meterReadingDao.insert(meterReading)
-    }
-
-    fun delete(meterReading: CustomerMeterReading) {
-        meterReadingDao.delete(meterReading)
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun insert(model: CustomerMeterReading){
+        meterReadingDao.insert(model)
     }
 }

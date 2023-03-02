@@ -1,25 +1,19 @@
 package com.example.userdisplay.room
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MeterReadingViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: MeterReadingRepository
 
-    val allReadings: LiveData<CustomerMeterReading>
+class MeterReadingViewModel(private val repository: MeterReadingRepository) : ViewModel() {
 
-    init {
-        val meterReadingDao = AppDatabase.getDatabase(application).meterReadingDao()
-        repository = MeterReadingRepository(meterReadingDao)
-        allReadings = repository.allReadings
+
+    // Launching a new coroutine to insert the data in a non-blocking way
+    fun insert(model: CustomerMeterReading) = viewModelScope.launch(Dispatchers.IO){
+        repository.insert(model)
     }
 
-    fun insert(meterReading: CustomerMeterReading) = viewModelScope.launch {
-        repository.insert(meterReading)
-    }
 }
 

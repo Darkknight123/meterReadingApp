@@ -4,32 +4,40 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-
-@Database(entities = [CustomerMeterReading::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
-
-    abstract fun meterReadingDao(): CustomerMeterReadingDao
+    abstract fun familyDao(): CustomerMeterReadingDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
-            val tempInstance = INSTANCE
-            if (tempInstance != null) {
-                return tempInstance
-            }
-            synchronized(this) {
+        fun getDatabase(
+            context: Context,
+            scope: CoroutineScope
+        ): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "meter_reading_database"
-                ).build()
+                    "user_profile_database"
+                ).fallbackToDestructiveMigration().build()
+
                 INSTANCE = instance
-                return instance
+
+                instance
             }
+        }
+    }
+    /** Custom implementation of the RoomDatabase.Callback(). */
+    class RoomDatabaseCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            INSTANCE?.let { _ -> scope.launch {} }
         }
     }
 }

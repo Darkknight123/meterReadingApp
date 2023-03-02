@@ -2,20 +2,21 @@ package com.example.userdisplay.room
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
-@Dao
 interface CustomerMeterReadingDao {
-
     @Query("SELECT * FROM customer_meter_reading")
-    fun getAll(): LiveData<CustomerMeterReading>
+    fun getAll(): Flow<CustomerMeterReading>
 
-    @Insert
-    fun insert(customerMeterReading: CustomerMeterReading)
-
-    @Update
-    fun update(customerMeterReading: CustomerMeterReading)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(familyMember: CustomerMeterReading)
 
     @Delete
-    fun delete(customerMeterReading: CustomerMeterReading)
+    fun delete(familyMember: CustomerMeterReading)
 
+    @Query("SELECT * FROM customer_meter_reading")
+    fun allUsers(): List<CustomerMeterReading?>?
+
+    @Update
+    fun update(familyMember: CustomerMeterReading)
 }
